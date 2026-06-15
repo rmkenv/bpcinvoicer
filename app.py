@@ -10,8 +10,9 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # ── Config ────────────────────────────────────────────────────────────────────
-OLLAMA_CLOUD_URL = st.secrets.get("OLLAMA_HOST", "https://ollama.com") + "/v1/chat/completions"
-MODEL = st.secrets.get("OLLAMA_MODEL", "gpt-oss:120b-cloud")
+OLLAMA_HOST = st.secrets.get("OLLAMA_HOST", "https://ollama.com")
+OLLAMA_CLOUD_URL = OLLAMA_HOST + "/api/chat"
+MODEL = st.secrets.get("OLLAMA_MODEL", "qwen3-vl:235b-cloud")
 
 SHEET_NAME = st.secrets.get("GOOGLE_SHEET_NAME", "Invoice Parser")
 WORKSHEET_INVOICES = "Invoices"
@@ -148,7 +149,7 @@ def extract_invoice(b64: str, api_key: str | None) -> dict:
             {
                 "role": "user",
                 "content": [
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
+                    {"type": "image", "data": b64},
                     {"type": "text", "text": "Extract all invoice fields from this image."},
                 ],
             },
@@ -159,7 +160,7 @@ def extract_invoice(b64: str, api_key: str | None) -> dict:
     resp.raise_for_status()
 
     data = resp.json()
-    raw = data["choices"][0]["message"]["content"]
+    raw = data["message"]["content"]
     clean = raw.replace("```json", "").replace("```", "").strip()
     return json.loads(clean)
 
