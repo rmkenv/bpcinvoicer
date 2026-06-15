@@ -148,10 +148,8 @@ def extract_invoice(b64: str, api_key: str | None) -> dict:
             {"role": "system", "content": SYSTEM_PROMPT},
             {
                 "role": "user",
-                "content": [
-                    {"type": "image", "data": b64},
-                    {"type": "text", "text": "Extract all invoice fields from this image."},
-                ],
+                "content": "Extract all invoice fields from this image.",
+                "images": [b64],
             },
         ],
     }
