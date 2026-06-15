@@ -10,8 +10,8 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # ── Config ────────────────────────────────────────────────────────────────────
-OLLAMA_CLOUD_URL = st.secrets.get("OLLAMA_CLOUD_URL", "https://ollama-cloud.com/v1/chat/completions")
-MODEL = "gpt-oss:20b"
+OLLAMA_CLOUD_URL = st.secrets.get("OLLAMA_HOST", "https://ollama.com") + "/v1/chat/completions"
+MODEL = st.secrets.get("OLLAMA_MODEL", "gpt-oss:120b-cloud")
 
 SHEET_NAME = st.secrets.get("GOOGLE_SHEET_NAME", "Invoice Parser")
 WORKSHEET_INVOICES = "Invoices"
@@ -136,8 +136,9 @@ def image_to_base64(uploaded_file) -> str:
 
 def extract_invoice(b64: str, api_key: str | None) -> dict:
     headers = {"Content-Type": "application/json"}
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
+    key = api_key or st.secrets.get("OLLAMA_API_KEY")
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
 
     payload = {
         "model": MODEL,
